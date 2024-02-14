@@ -1,0 +1,15 @@
+---
+# vars file for backend_server
+user: "ubuntu"
+backend_file_path: "/home/kaylyn/app_setup/backend"
+requirements_path: "/backend/src/backend/requirements.txt"
+install_dir: /var/www/db
+app_db_name: "a03rds"
+db_username: "username"
+db_password: "password"
+db_root_password: "root"
+backend_private_ip: "{{ hostvars[groups['a03_be_ec2'][0]]['public_ip_address'] }}"
+web_public_dns: "{{ hostvars[groups['a03_web_ec2'][0]]['public_ip_address'] }}"
+rds_port: "3306"
+rds_endpoint: "{{ hostvars[groups['aws_rds'][0]]['endpoint']['address'] }}"
+# rds_endpoint: "rds-database-instance.cecc3kija3qy.us-west-2.rds.amazonaws.com"

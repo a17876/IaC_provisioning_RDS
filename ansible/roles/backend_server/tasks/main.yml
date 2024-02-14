@@ -1,0 +1,103 @@
+---
+# tasks file for backend
+
+# Create /backend/src directory to store backend files
+- name: Make /backend/src directory
+  ansible.builtin.file:
+    path: "/backend/src"
+    state: directory
+    owner: "{{ user }}"
+    group: "{{ user }}"
+    mode: "0755"
+  become: true
+  tags:
+    - backend
+    - create
+
+# Copy backend folder from local machine to the a02_backend_instance
+- name: Copy the backend folder to backend instance
+  ansible.builtin.copy:
+    src: "{{ backend_file_path }}"
+    dest: "/backend/src/"
+    owner: "{{ user }}"
+    group: "{{ user }}"
+    mode: "0755"
+  become: true
+  tags:
+    - backend
+    - files
+
+# Install Python3-pip
+- name: Install Python3-pip
+  ansible.builtin.package:
+    update_cache: true
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - python3
+    - python3-pip
+    - libmysqlclient-dev
+    - pkg-config
+    - python3-dev
+  become: true
+  tags:
+    - backend
+    - install
+
+# Install Python packages from requirements.txt
+- name: Install Python packages from requirements.txt
+  ansible.builtin.pip:
+    requirements: "{{ requirements_path }}"
+    extra_args: "--break-system-packages"
+  become: true
+  tags:
+    - backend
+    - install
+
+# Install MySQL client to test the database
+- name: Install MySQL client
+  apt:
+    name: mysql-client
+    state: present
+  become: true
+
+# Template backend.conf.j2 to backend.conf
+- name: Template backend.conf.j2 to backend.conf
+  ansible.builtin.template:
+    src: templates/backend.conf.j2
+    dest: /backend/src/backend/backend.conf
+    owner: "{{ user }}"
+    group: "{{ user }}"
+    mode: '0644'
+  tags:
+    - backend
+    - files
+
+# Copy the backend.service file to and systemreload
+- name: Copy the backend.service file to and systemreload
+  ansible.builtin.copy:
+    src: files/backend.service
+    dest: "/etc/systemd/system/"
+    mode: "0755"
+  notify: Reload systemd
+  become: true
+  tags:
+    - backend
+    - files
+
+# Create table in the backend database
+- name: Create Table
+  community.mysql.mysql_query:
+    login_user: "{{ db_username }}"
+    login_password: "{{ db_password }}"
+    login_host: "{{ rds_endpoint }}"
+    login_port: "{{ rds_port }}"
+    login_db: "{{ app_db_name }}"
+    query:
+      - "CREATE TABLE IF NOT EXISTS {{ app_db_name }}.item (
+        name varchar(30) NOT NULL,
+        bcit_id varchar(10) NOT NULL,
+        PRIMARY KEY (bcit_id)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;"
+      - "INSERT INTO {{ app_db_name }}.item (
+        name, bcit_id) VALUES ('example_name', 'A01234567') ON DUPLICATE KEY UPDATE name='example_name';"

@@ -1,0 +1,56 @@
+---
+# tasks file for web_server
+
+# Update the cache
+- name: Update package update_cache
+  ansible.builtin.package:
+    update_cache: true
+  become: true
+
+# Create /frontend derectory to store index.html
+- name: Make frontend directory
+  ansible.builtin.file:
+    path: /frontend
+    state: directory
+    owner: "{{ user }}"
+    group: "{{ user }}"
+    mode: "0755"
+  become: true
+  tags:
+    - frontend
+    - create
+
+# Copy index.html file from local machine to a02_web_instance
+- name: Copy the frontend folder to web instance
+  ansible.builtin.copy:
+    src: files/index.html
+    dest: /frontend/
+    mode: "0755"
+  tags:
+    - frontend
+    - files
+
+# Install nginx
+- name: Install nginx
+  ansible.builtin.package:
+    update_cache: true
+    name: nginx
+    state: present
+  become: true
+  tags:
+    - frontend
+    - install
+
+# Replace default file to direct index.html file
+- name: Replace /etc/nginx/sites-available/default
+  ansible.builtin.template:
+    src: templates/default.j2
+    dest: "{{ web_conf_file_path }}"
+    owner: root
+    group: root
+    mode: "0644"
+  become: true
+  notify: Restart Nginx
+  tags:
+    - frontend
+    - service

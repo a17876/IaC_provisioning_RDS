@@ -1,0 +1,4 @@
+---
+plugin: aws_rds
+regions:
+  - us-west-2

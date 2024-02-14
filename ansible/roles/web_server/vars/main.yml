@@ -1,0 +1,7 @@
+---
+# vars file for web_server
+user: "ubuntu"
+frontend_file_path: "/home/kaylyn/app_setup/frontend"
+web_public_dns: "{{ hostvars[groups['a03_web_ec2'][0]]['public_ip_address'] }}"
+web_conf_file_path: "/etc/nginx/sites-available/default"
+backend_private_ip: "{{ hostvars[groups['a03_be_ec2'][0]]['public_ip_address'] }}"

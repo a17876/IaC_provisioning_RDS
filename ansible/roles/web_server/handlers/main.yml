@@ -1,0 +1,13 @@
+---
+# handlers file for web_server
+
+# Handler - Restart nginx when default file is changed
+- name: Restart Nginx
+  ansible.builtin.service:
+    name: nginx
+    state: restarted
+    enabled: true 
+  become: true
+  tags:
+    - frontend
+    - service

@@ -1,0 +1,10 @@
+---
+- name : Roles for the application servers
+  hosts: a03_web_ec2
+  roles: 
+    - web_server
+
+- name: Backend setup roles
+  hosts: a03_be_ec2
+  roles:
+    - backend_server

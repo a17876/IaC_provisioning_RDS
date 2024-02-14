@@ -1,0 +1,10 @@
+---
+# handlers file for database
+
+# Restart mySQL handler
+- name: Reload systemd
+  ansible.builtin.service:
+    name: mysql
+    state: restarted
+    enabled: true
+  become: true
